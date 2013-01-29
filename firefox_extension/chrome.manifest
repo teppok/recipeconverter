@@ -1,0 +1,8 @@
+content     recipeconvert er   chrome/content/
+content     recipeconverter    chrome/content/ contentaccessible=yes
+overlay chrome://browser/content/browser.xul chrome://recipeconverter/content/browser.xul
+
+locale	recipeconverter	en-US	locale/en-US/
+
+skin	recipeconverter	classic/1.0	skin/
+style	chrome://global/content/customizeToolbar.xul	chrome://recipeconverter/skin/skin.css

@@ -1,0 +1,364 @@
+/**
+ * @author Teppo Kankaanpää
+ */
+
+	var CUPTYPE = 1;
+	var PTTYPE = 2;
+	var QTTYPE = 3;
+	var GALTYPE = 4;
+	var OZTYPE = 5;
+	var LBTYPE = 6;
+	
+	var CUTSIZE = 20;
+	
+	var conversions = [ { match: /^cup/, type: CUPTYPE, match2: /cups?/, convertedType: "dl" },
+				{ match: /^pt/, type: PTTYPE, match2: /pts?/, convertedType: "dl" },
+				{ match: /^pint/, type: PTTYPE, match2: /pints?/, convertedType: "dl" },
+				{ match: /^qt/, type: QTTYPE, match2: /qts?/, convertedType: "dl" },
+				{ match: /^quart/, type: QTTYPE, match2: /quarts?/, convertedType: "dl" },
+				{ match: /^gal/, type: GALTYPE, match2: /gal(lon)?s?/, convertedType: "dl" },
+				{ match: /^oz/, type: OZTYPE, match2: /oz/, convertedType: "g" },
+				{ match: /^ounce/, type: OZTYPE, match2: /ounces?/, convertedType: "g" },
+				{ match: /^lb/, type: LBTYPE, match2: /lbs?/, convertedType: "g" },
+				{ match: /^pound/, type: LBTYPE, match2: /pounds?/, convertedType: "g" },
+	 ];
+	var bigmatch = /[ \t-](cup|pt|pint|qt|quart|gal|gallon|oz|ounce|lb|pound)s?\b/;
+
+
+	function convert(value, type) {
+		if (type == CUPTYPE) {
+			return Math.round(value * 2.36588237 * 100) / 100;
+		}
+		if (type == PTTYPE) {
+			return Math.round(value * 4.73176473 * 100) / 100;
+		}
+		if (type == QTTYPE) {
+			return Math.round(value * 9.46352946 * 100) / 100;
+		}
+		if (type == GALTYPE) {
+			return Math.round(value * 37.8541178 * 100) / 100;
+		}
+		if (type == OZTYPE) {
+			return Math.round(value * 28.3495231 * 100) / 100;
+		}
+		if (type == LBTYPE) {
+			return Math.round(value * 453.59237 * 100) / 100;
+		}
+		return value;
+	};
+	
+	function parseFractional(value) {
+		var trimmed = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		//(value.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
+		
+		var parts = trimmed.split(" ");
+		
+		if (parts.length > 2 || parts.length == 0) {
+			return "";
+		}
+		if (parts.length == 1) {
+			var fraction = parts[0].split("/");
+			if (fraction.length == 0 || fraction.length > 2) {
+				return "";
+			}
+			if (fraction.length == 1) {
+				return parseFloat(trimmed);
+			}
+			var numer = parseInt(fraction[0], 10);
+			var denomin = parseInt(fraction[1], 10);
+			//alert("" + numer + " " + denomin + " " + (numer/denomin));
+			return numer / denomin;
+		}
+		if (parts.length == 2) {
+			var fraction = parts[1].split("/");
+			if (fraction.length == 0 || fraction.length > 2) {
+				return "";
+			}
+			if (fraction.length == 1) {
+				return "";
+			}
+			var numer = parseInt(fraction[0]);
+			var denomin = parseInt(fraction[1]);
+			//alert("" + numer + " " + denomin + " " + (parseInt(parts[0]) + numer/denomin));
+			return parseInt(parts[0]) + numer/denomin;
+		}
+		return "";
+	};
+
+
+
+	function traverseChildNodes(node) {
+	 
+	    var next;
+
+	    if (node.nodeType === 1) {
+	 
+	        // (Element node)
+	 		node = node.firstChild;
+	        if (node) {
+	            do {
+	                // Recursively call traverseChildNodes
+	                // on each child node
+	                next = node.nextSibling;
+	                traverseChildNodes(node);
+	                node = next;
+	            } while(node);
+	        }
+	 
+	    } else if (node.nodeType === 3) {
+	 
+	        // (Text node)
+	 
+	        if (bigmatch.test(node.data)) {
+	        	
+	            // Do something interesting here
+	            parseNode(node);
+	        }
+
+
+	 
+	    }
+	 
+	};
+
+
+	function parseNode(textNode) {
+		
+		//var temp = document.createElement('div');
+ 
+		    //temp.innerHTML = recipeConverter.parse(textNode.data);
+
+		var tmpData = parse(textNode.data);
+	 	if (tmpData) textNode.data = tmpData;
+	 
+	    // temp.innerHTML is now:
+	    // "\n    This order's reference number is <a href="/order/RF83297">RF83297</a>.\n"
+	    // |_______________________________________|__________________________________|___|
+	    //                     |                                      |                 |
+	    //                 TEXT NODE                             ELEMENT NODE       TEXT NODE
+	 
+	    // Extract produced nodes and insert them
+	    // before original textNode:
+	    //alert("parsed: " + temp.innerHTML + ":" + temp.firstChild);
+	    //while (temp.firstChild) {
+	    //    alert(temp.firstChild.nodeType);
+	    //    textNode.parentNode.insertBefore(textNode, temp.firstChild);
+	    //}
+	    // Logged: 3,1,3
+	 
+	    // Remove original text-node:
+	    //textNode.parentNode.removeChild(textNode);
+	 
+	};
+
+	function parse(body) {
+
+//			alert("moo");
+//			var body = "test 1 2 cup sugar 2 to 3 cups flour, free cups, 1/2 pt milk, 1 pt milk, 1 1/2 pt milk, 1 2/3 pt milk, 1 2/3/4 pt milk, 5 ounces juice";
+		
+		var cindex, currentCutSize, cutBegin, continueIndex;
+		var smallSection, joinChar, smallAfterSection, smallAfterSplit, originalType;
+		var matchId, i;
+		var ofAIndex, lastNumIndex, lastNum, lastNumParsed;
+		var toIndex, firstNumIndex, firstNum, firstNumParsed;
+		var moreOfNum;
+		var newFirstNum, newLastNum;
+		
+		var loop = 0;
+		
+		var newBody = "";
+		var todoBody = body;
+		var tmpBody;
+		
+		var conversionPerformed = false;
+		
+			while (loop < 200) {
+				loop++;
+				//alert (newBody + "-" + todoBody);
+				
+				cindex = todoBody.search(bigmatch);
+				if (cindex == -1) {
+					break;
+				}		
+//					alert("bigmatch");		
+				//alert("Loopy " + i + " " + conversions[i].match + " " + cindex);
+				
+				if (cindex < CUTSIZE) {
+					currentCutSize = cindex;
+				} else {
+					currentCutSize = CUTSIZE;
+				}
+				
+				cutBegin = cindex - currentCutSize;
+				smallSection = todoBody.substring(cutBegin, cindex);
+//					alert(smallSection);
+				
+				joinChar = todoBody.substring(cindex, cindex + 1);
+
+				smallAfterSection = todoBody.substring(cindex + 1, cindex+7);
+
+				smallAfterSplit = smallAfterSection.split(/\s/);
+				originalType = smallAfterSplit[0];
+				continueIndex = cindex + originalType.length + 1;
+
+				matchId = -1;
+				
+				for (i = 0; i < conversions.length; i++) {
+					if (smallAfterSection.search(conversions[i].match) == 0) {
+						matchId = i;
+						break;
+					}
+				}
+//					alert("match: " + matchId);
+				if (matchId == -1) {
+					// Funny thing happened, big match matched, but not one of the small ones.
+					// This is not supposed to happen, so just leave.
+					break;
+				}
+
+				ofAIndex = smallSection.search(/ of an?$/);
+
+				if (ofAIndex >= 0) {
+					
+					// Tämän jälkeen:
+					// originaltype = "of a cup"
+					// smallsection = esim. "asdf 1/8"
+					
+					originalType = smallSection.substring(ofAIndex + 1) + " " + originalType;
+					smallSection = smallSection.substring(0, ofAIndex);
+					
+				}
+//					alert(smallSection + "." + originalType);
+
+//              xyz 10 to 11 cups
+//                  | |   | +- katkaisukohta
+//                  | |   +- lastNumIndex
+//                  | +- toIndex
+//                  +- firstNumIndex
+
+				
+				lastNumIndex = smallSection.search(/[0-9][0-9.,/]*[ \t]*$/);
+				
+				if (lastNumIndex == -1) {
+					newBody = newBody + todoBody.substring(0, continueIndex);
+					todoBody = todoBody.substring(continueIndex);
+					continue;
+				}
+//					alert("-");
+
+//						lastNum = smallSection.substring(lastNumIndex, cindex);
+
+				lastNum = smallSection.substring(lastNumIndex);
+
+				if (lastNum.indexOf("/") >= 0) {
+					// Fractional value on the last number. If joinchar is NOT -, take the previous
+					// number as the whole number part of a fractional, ie. join it to the number.
+					// If it is -, ignore. 
+					// Example: 2 1/2-ounce cans of tomatoes.
+					
+					if (joinChar != "-") {
+						moreOfNum = smallSection.substring(0, lastNumIndex).search(/[0-9][0-9.,]*[ \t]*$/);
+						if (moreOfNum >= 0) {
+							lastNumIndex = moreOfNum;
+							lastNum = smallSection.substring(lastNumIndex);
+						}							
+					}						
+				}
+				
+				lastNumParsed = parseFractional(lastNum);
+				if (lastNumParsed == "") {
+					newBody = newBody + todoBody.substring(0, continueIndex);
+					todoBody = todoBody.substring(continueIndex);
+					continue;
+				}
+
+//					if (i == 1) {
+//						alert("" + lastNum + " " + lastNumParsed);
+//					}
+//						b2String = body.substring(0, lastNumIndex);
+				toIndex = smallSection.substring(0, lastNumIndex).search(/([ \t]to|[ \t]or|[ \t]and|-)[ \t]*$/);
+
+				if (toIndex != -1) {
+					firstNumIndex = smallSection.substring(0, toIndex).search(/[0-9][0-9.,/]*-?[ \t]*$/);
+				} else {
+					firstNumIndex = -1;
+				}
+				
+//							b3String = body.substring(0, toIndex);
+				
+				if (firstNumIndex != -1) {
+					firstNum = smallSection.substring(firstNumIndex, toIndex);
+					
+					if (firstNum.indexOf("/") >= 0) {
+						// Fractional value on the last number. If joinchar is NOT -, take the previous
+						// number as the whole number part of a fractional, ie. join it to the number.
+						// If it is -, ignore. 
+						// Example: 2 1/2-ounce cans of tomatoes.
+						
+						if (joinChar != "-") {
+							moreOfNum = smallSection.substring(0, firstNumIndex).search(/[0-9][0-9]*[ \t]*$/);
+							if (moreOfNum >= 0) {
+								firstNumIndex = moreOfNum;
+								firstNum = smallSection.substring(firstNumIndex, toIndex);
+							}
+						}						
+					}
+					
+					
+					firstNumParsed = parseFractional(firstNum);
+					
+					if (firstNumParsed == "") {
+						newBody = newBody + todoBody.substring(0, continueIndex);
+						todoBody = todoBody.substring(continueIndex);
+						continue;
+					}
+						
+						
+					newFirstNum = convert(firstNumParsed, conversions[matchId].type);
+					newLastNum = convert(lastNumParsed, conversions[matchId].type);
+					
+					
+					newBody = newBody + todoBody.substring(0, cutBegin) +
+					    smallSection.substring(0, firstNumIndex) + 
+					    newFirstNum + 
+						smallSection.substring(toIndex, lastNumIndex) + 
+						newLastNum + joinChar + conversions[matchId].convertedType +
+						//originalType.replace(conversions[matchId].match2, conversions[matchId].convertedType) + 
+						" (" +
+					    firstNum + 
+						smallSection.substring(toIndex, lastNumIndex) + 
+						lastNum + joinChar + originalType + ")";
+						
+					todoBody = todoBody.substring(continueIndex);
+					conversionPerformed = true;
+						
+				} else {
+					newLastNum = convert(lastNumParsed, conversions[matchId].type);
+					
+					newBody = newBody + todoBody.substring(0, cutBegin) +
+					    smallSection.substring(0, lastNumIndex) + 
+						newLastNum + joinChar + conversions[matchId].convertedType +
+						//originalType.replace(conversions[matchId].match2, conversions[matchId].convertedType) + 
+						" (" +
+						lastNum + joinChar + originalType + ")";
+					  
+//							if (i == 1) { alert ("okay " + newLastNum); }
+//							alert ("")
+					todoBody = todoBody.substring(continueIndex);
+					conversionPerformed = true;
+				}
+			}
+			
+			tmpBody = newBody + todoBody;
+			newBody = "";
+			todoBody = tmpBody;
+//			}
+
+		if (conversionPerformed) {
+			return todoBody;
+		} else {
+			return "";
+		}
+	};
+		
+

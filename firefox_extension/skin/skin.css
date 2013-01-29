@@ -1,0 +1,32 @@
+#recipe-converter-toolbar-button[value='inactive'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-red.png");
+}
+
+#recipe-converter-toolbar-button[value='active'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-green.png");
+}
+
+#recipe-converter-status-bar-icon[value='inactive-noglow'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-red.png");
+}
+
+#recipe-converter-status-bar-icon[value='active-noglow'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-green.png");
+}
+
+#recipe-converter-status-bar-icon[value='inactive-glow'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-red-glow.png");
+}
+
+#recipe-converter-status-bar-icon[value='active-glow'] {
+	list-style-image: URL("chrome://recipeconverter/skin/fork-green-glow.png");
+}
+
+#recipe-converter-status-bar {
+	width: 16px;
+	margin: 0 5px;
+}
+
+/*.link-target-finder-selected {
+	outline: 2px solid red !important;
+}*/

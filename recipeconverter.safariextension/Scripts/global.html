@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script type="text/javascript">
+		
+		
+/*
+ * 
+ * respondToMessage:
+ *   event listener that will fetch setting values and reply them to the caller.
+ *   This will allow the converter script to see the auto-run setting.
+ */
+		
+
+			function respondToMessage(messageEvent) {
+
+			    if (messageEvent.name == "getSettingValue") {
+			
+			           // getItem("foo");
+			        var value = safari.extension.settings.getItem(messageEvent.message);
+			        // return value of foo to injected script
+			           safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("settingValueIs", value);
+			
+			    } 
+			}
+			
+			safari.application.addEventListener("message",respondToMessage,false);
+
+function performCommand(event)
+{
+
+    if (event.command === "recipeconverter-button") {
+		safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("runNow", "run");
+    }
+
+}
+
+ 
+
+function validateCommand(event)
+
+{
+
+    if (event.command === "recipeconverter-button") {
+
+        // Disable the button if there is no URL loaded in the tab.
+
+        event.target.disabled = !event.target.browserWindow.activeTab.url;
+
+    }
+
+}
+
+safari.application.addEventListener("command", performCommand, false);
+
+safari.application.addEventListener("validate", validateCommand, false);
+
+		</script>
+	</head>
+
+	<body>
+	</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://recipeconverter/skin/skin.css" type="text/css"?>
+<!DOCTYPE recipeconverter SYSTEM "chrome://recipeconverter/locale/translations.dtd">
+<overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+		<script src="recipeconverter.js" />
+
+		<menupopup id="menu_ToolsPopup">
+			<menuitem label="&runrecipeconverter;" key="recipe-converter-run-key" oncommand="recipeConverter.run()"/>
+		</menupopup>
+		
+		<statusbar id="status-bar">
+			<statusbarpanel id="recipe-converter-status-bar" tooltiptext="&togglerecipeconverter;">
+			<!-- class="statusbarpanel-iconic" tooltiptext="&togglerecipeconverter;"> -->
+			  <image id="recipe-converter-status-bar-icon" onclick="recipeConverter.toggle()" />
+			</statusbarpanel>
+			
+		</statusbar>
+
+<!--
+		<toolbarpalette id="BrowserToolbarPalette">
+			<toolbarbutton id="recipe-converter-toolbar-button" label="Recipe Converter" tooltiptext="&runrecipeconverter;" oncommand="recipeConverter.run()"/>
+		</toolbarpalette>
+-->		
+</overlay>
