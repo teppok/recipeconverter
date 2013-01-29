@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Recipe converter</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <h3 align="center">Recipe converter plugin for Firefox and Safari</h3>
+        
+        <div style="width: 400px; margin-left: auto; margin-right: auto;">
+        <p>Have you ever found a nice recipe on the Internet, but alas, it was in
+        	American units. You have to go ask Google or something to convert them to units the rest of the world uses 
+        	when you should be cooking.</p>
+        	
+        <p>Hope's not lost! The recipe converter is here. This Firefox plugin will automatically convert any American
+        	weight or volume units on any page. It's designed for recipe use, so it will understand phrases like
+        	"2 to 3 cups of milk" and fractions such as "1 1/2 lbs bacon". However, it will happily convert currency pounds to kgs too,
+        	so you may want to keep the add-on on autorun mode only when browsing recipes.</p>
+
+		<p>All feedback to teppo dot kankaanpaa at iki.fi is appreciated!</p>
+        	
+        <p>Instructions for use for Firefox: <ul><li>Install the <a href="recipeconverter.xpi">Firefox plugin</a> and restart Firefox.</li>
+        	<li>Automatic conversion is not on by default, you can turn it on by clicking the
+        		fork icon in the add-on bar at the bottom of the Firefox window (not visible by default - 
+        		turn it on with View -> Toolbars -> Add-on bar (Näytä -> Työkalupalkit -> Lisäosapalkki in Finnish)) 
+        		or navigating to Tools -> Add-ons, choosing Extensions side tab, clicking Options on Recipe converter and
+        		checking Autorun.</li>
+        	<li>Even if automatic conversion is not on, you can convert any page by choosing
+        		menu item Tools -> Run recipe converter.</li>
+        	</ul>
+        <p>Instructions for use for Safari: <ul><li>Install the <a href="recipeconverter-safari.safariextz">Safari plugin</a>. Note that the install is quite silent, so if you get install errors, check that the plugin didn't already get installed.</li>
+        	<li>Automatic conversion is not on by default. You can turn it on from Preferences -> Extensions -> Recipe converter -> Autorun.</li>
+			<li>Even if automatic conversion is not on, you can add a button to the toolbar to manually convert any page you are currently viewing.
+				Choose Customize toolbar under the Settings button and drag the Recipe converter fork icon to the toolbar.</li>
+			<li>Safari extension is still in early development and may have performance issues, so you may want to completely
+				disable it when you're not browsing recipes. Uncheck Preferences -> Extensions -> Recipe Converter -> Enable Recipe converter.</li>
+			</ul>
+		<p><ul>
+        	<li>This program is still in development, so it might be buggy.</li>
+        	<li>Known issues:
+        		<ul><li>Some patterns are not yet supported. Please let me know if you see anything that isn't converted properly and I might add it.</li>
+        			<li>No way to revert back to the original page other than disabling the automation and reloading the page.</li>
+        			<li>The program might have performance issues, so keep the automatic conversion disabled for normal non-recipe surfing,
+        				or keep an eye out for sluggishness especially if you use a slower computer, and let me know if it happens.</li>
+        			<li>Length and temperature conversion will be added at a later date.</li>
+        		</ul></li>
+        </ul></p>
+		</div>
+		
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.3.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            var _gaq=[['_setAccount','UA-37644492-1'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
