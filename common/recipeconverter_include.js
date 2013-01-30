@@ -2,6 +2,15 @@
  * @author Teppo Kankaanpää
  */
 
+/*
+ * Documented at parse function.
+ */
+	var CUTSIZE = 20;
+
+/*
+ * Conversions.
+ */	
+
 	var CUPTYPE = 1;
 	var PTTYPE = 2;
 	var QTTYPE = 3;
@@ -9,21 +18,23 @@
 	var OZTYPE = 5;
 	var LBTYPE = 6;
 	
-	var CUTSIZE = 20;
-	
-	var conversions = [ { match: /^cup/, type: CUPTYPE, match2: /cups?/, convertedType: "dl" },
-				{ match: /^pt/, type: PTTYPE, match2: /pts?/, convertedType: "dl" },
-				{ match: /^pint/, type: PTTYPE, match2: /pints?/, convertedType: "dl" },
-				{ match: /^qt/, type: QTTYPE, match2: /qts?/, convertedType: "dl" },
-				{ match: /^quart/, type: QTTYPE, match2: /quarts?/, convertedType: "dl" },
-				{ match: /^gal/, type: GALTYPE, match2: /gal(lon)?s?/, convertedType: "dl" },
-				{ match: /^oz/, type: OZTYPE, match2: /oz/, convertedType: "g" },
-				{ match: /^ounce/, type: OZTYPE, match2: /ounces?/, convertedType: "g" },
-				{ match: /^lb/, type: LBTYPE, match2: /lbs?/, convertedType: "g" },
-				{ match: /^pound/, type: LBTYPE, match2: /pounds?/, convertedType: "g" },
+	var conversions = [ { match: /^cup/, type: CUPTYPE, convertedType: "dl" },
+				{ match: /^pt/, type: PTTYPE, convertedType: "dl" },
+				{ match: /^pint/, type: PTTYPE, convertedType: "dl" },
+				{ match: /^qt/, type: QTTYPE, convertedType: "dl" },
+				{ match: /^quart/, type: QTTYPE, convertedType: "dl" },
+				{ match: /^gal/, type: GALTYPE, convertedType: "dl" },
+				{ match: /^oz/, type: OZTYPE, convertedType: "g" },
+				{ match: /^ounce/, type: OZTYPE, convertedType: "g" },
+				{ match: /^lb/, type: LBTYPE, convertedType: "g" },
+				{ match: /^pound/, type: LBTYPE, convertedType: "g" },
 	 ];
+	 
 	var bigmatch = /[ \t-](cup|pt|pint|qt|quart|gal|gallon|oz|ounce|lb|pound)s?\b/;
 
+/*
+ * Convert a value in a conversion type to its predetermined units.
+ */
 
 	function convert(value, type) {
 		if (type == CUPTYPE) {
@@ -46,6 +57,13 @@
 		}
 		return value;
 	};
+
+/*
+ * Parse a fractional representation (such as '1 1/2') of a number and return its
+ * floating point value. If the number is not fractional, then just return that number.
+ * 
+ * If the number is somehow weird (for example 1 2 3), return an empty string.
+ */
 	
 	function parseFractional(value) {
 		var trimmed = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
@@ -85,7 +103,9 @@
 		return "";
 	};
 
-
+/*
+ * Search recursively through the nodes in a DOM node for text nodes.
+ */
 
 	function traverseChildNodes(node) {
 	 
@@ -110,8 +130,6 @@
 	        // (Text node)
 	 
 	        if (bigmatch.test(node.data)) {
-	        	
-	            // Do something interesting here
 	            parseNode(node);
 	        }
 
@@ -121,16 +139,22 @@
 	 
 	};
 
+/*
+ * parse the data in a dom text node and replace it with
+ * the updated units. 
+ */
 
 	function parseNode(textNode) {
 		
-		//var temp = document.createElement('div');
- 
-		    //temp.innerHTML = recipeConverter.parse(textNode.data);
 
 		var tmpData = parse(textNode.data);
 	 	if (tmpData) textNode.data = tmpData;
+
+/* This commented section is saved for future because we might want to add links to the text nodes at some point. */ 
 	 
+		//var temp = document.createElement('div');
+ 
+	    //temp.innerHTML = recipeConverter.parse(textNode.data);
 	    // temp.innerHTML is now:
 	    // "\n    This order's reference number is <a href="/order/RF83297">RF83297</a>.\n"
 	    // |_______________________________________|__________________________________|___|
@@ -151,11 +175,20 @@
 	 
 	};
 
+/*
+ * Take a string argument, go through it and return a string where the units have been changed to
+ * SI-units.
+ * 
+ * Return "" if nothing was changed.
+ * 
+ * First find using bigmatch index points where the string contains possible unit matches.
+ * Then cut CUTSIZE many chars before that index to look for numbers and some accompanying text.
+ * If we find numbers and some well behaving text, we replace them, otherwise we just ignore that
+ * possible match.
+ */
+
 	function parse(body) {
 
-//			alert("moo");
-//			var body = "test 1 2 cup sugar 2 to 3 cups flour, free cups, 1/2 pt milk, 1 pt milk, 1 1/2 pt milk, 1 2/3 pt milk, 1 2/3/4 pt milk, 5 ounces juice";
-		
 		var cindex, currentCutSize, cutBegin, continueIndex;
 		var smallSection, joinChar, smallAfterSection, smallAfterSplit, originalType;
 		var matchId, i;
@@ -180,7 +213,6 @@
 				if (cindex == -1) {
 					break;
 				}		
-//					alert("bigmatch");		
 				//alert("Loopy " + i + " " + conversions[i].match + " " + cindex);
 				
 				if (cindex < CUTSIZE) {
@@ -188,12 +220,20 @@
 				} else {
 					currentCutSize = CUTSIZE;
 				}
+
+				/* smallsection contains CUTSIZE many chars before the bigmatch point */
 				
 				cutBegin = cindex - currentCutSize;
 				smallSection = todoBody.substring(cutBegin, cindex);
 //					alert(smallSection);
 				
+				/* joinChar is how the number joins to the unit: space, minus or tab. */
+				
 				joinChar = todoBody.substring(cindex, cindex + 1);
+
+				/* smallAfterSection is the unit, plus maybe something. originalType is only the unit. 
+				   continueIndex is where the text continues after the unit.
+				 */
 
 				smallAfterSection = todoBody.substring(cindex + 1, cindex+7);
 
@@ -216,13 +256,15 @@
 					break;
 				}
 
+				/* Prepare for a pattern "1/2 of a cup". */
+
 				ofAIndex = smallSection.search(/ of an?$/);
 
 				if (ofAIndex >= 0) {
 					
-					// Tämän jälkeen:
-					// originaltype = "of a cup"
-					// smallsection = esim. "asdf 1/8"
+					// After this:
+					// originalType = "of a cup"
+					// smallSection = for example. "asdf 1/8"
 					
 					originalType = smallSection.substring(ofAIndex + 1) + " " + originalType;
 					smallSection = smallSection.substring(0, ofAIndex);
@@ -231,7 +273,7 @@
 //					alert(smallSection + "." + originalType);
 
 //              xyz 10 to 11 cups
-//                  | |   | +- katkaisukohta
+//                  | |   | +- cutting index
 //                  | |   +- lastNumIndex
 //                  | +- toIndex
 //                  +- firstNumIndex
@@ -244,9 +286,6 @@
 					todoBody = todoBody.substring(continueIndex);
 					continue;
 				}
-//					alert("-");
-
-//						lastNum = smallSection.substring(lastNumIndex, cindex);
 
 				lastNum = smallSection.substring(lastNumIndex);
 
@@ -275,7 +314,9 @@
 //					if (i == 1) {
 //						alert("" + lastNum + " " + lastNumParsed);
 //					}
-//						b2String = body.substring(0, lastNumIndex);
+
+				/* Check for possible "1 to 2 cups" pattern. */
+
 				toIndex = smallSection.substring(0, lastNumIndex).search(/([ \t]to|[ \t]or|[ \t]and|-)[ \t]*$/);
 
 				if (toIndex != -1) {
@@ -284,9 +325,10 @@
 					firstNumIndex = -1;
 				}
 				
-//							b3String = body.substring(0, toIndex);
 				
 				if (firstNumIndex != -1) {
+					/* If the pattern is a two-number pattern like "1 to 2 cups" */
+					
 					firstNum = smallSection.substring(firstNumIndex, toIndex);
 					
 					if (firstNum.indexOf("/") >= 0) {
@@ -323,7 +365,6 @@
 					    newFirstNum + 
 						smallSection.substring(toIndex, lastNumIndex) + 
 						newLastNum + joinChar + conversions[matchId].convertedType +
-						//originalType.replace(conversions[matchId].match2, conversions[matchId].convertedType) + 
 						" (" +
 					    firstNum + 
 						smallSection.substring(toIndex, lastNumIndex) + 
@@ -333,12 +374,13 @@
 					conversionPerformed = true;
 						
 				} else {
+					/* If the pattern is one number pattern. */
+					
 					newLastNum = convert(lastNumParsed, conversions[matchId].type);
 					
 					newBody = newBody + todoBody.substring(0, cutBegin) +
 					    smallSection.substring(0, lastNumIndex) + 
 						newLastNum + joinChar + conversions[matchId].convertedType +
-						//originalType.replace(conversions[matchId].match2, conversions[matchId].convertedType) + 
 						" (" +
 						lastNum + joinChar + originalType + ")";
 					  
@@ -352,8 +394,7 @@
 			tmpBody = newBody + todoBody;
 			newBody = "";
 			todoBody = tmpBody;
-//			}
-
+			
 		if (conversionPerformed) {
 			return todoBody;
 		} else {
