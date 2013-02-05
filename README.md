@@ -24,5 +24,10 @@
       Use Safari extension builder. Point the extension to the recipeconverter.safariextension directory
     and build recipeconverter.safariextz file using that.
     
+  2.4. Testing
+  
+      After running the preprocessor, there is a testing suite at tests/ which can be run using
+      tests/tests.html.
+      
   
      
