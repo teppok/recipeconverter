@@ -2,7 +2,7 @@
  * @author Teppo Kankaanpää
  */
 
-/* Fluff for firefox.
+/* Fluff for Firefox.
  * 
  * We wrap everything inside a variable to adhere to extension coding standard.
  * 
