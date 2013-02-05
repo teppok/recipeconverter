@@ -69,9 +69,9 @@
 		var trimmed = value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 		//(value.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
 		
-		var parts = trimmed.split(" ");
+		var parts = trimmed.split(/\s+/);
 		
-		if (parts.length > 2 || parts.length == 0) {
+		if (parts.length > 2 || parts.length == 0 || trimmed == "") {
 			return "";
 		}
 		if (parts.length == 1) {
@@ -82,8 +82,8 @@
 			if (fraction.length == 1) {
 				return parseFloat(trimmed);
 			}
-			var numer = parseInt(fraction[0], 10);
-			var denomin = parseInt(fraction[1], 10);
+			var numer = parseFloat(fraction[0], 10);
+			var denomin = parseFloat(fraction[1], 10);
 			//alert("" + numer + " " + denomin + " " + (numer/denomin));
 			return numer / denomin;
 		}
@@ -95,10 +95,10 @@
 			if (fraction.length == 1) {
 				return "";
 			}
-			var numer = parseInt(fraction[0]);
-			var denomin = parseInt(fraction[1]);
+			var numer = parseFloat(fraction[0]);
+			var denomin = parseFloat(fraction[1]);
 			//alert("" + numer + " " + denomin + " " + (parseInt(parts[0]) + numer/denomin));
-			return parseInt(parts[0]) + numer/denomin;
+			return parseFloat(parts[0]) + numer/denomin;
 		}
 		return "";
 	};
@@ -130,25 +130,11 @@
 	        // (Text node)
 	 
 	        if (bigmatch.test(node.data)) {
-	            parseNode(node);
+				var tmpData = parse(node.data);
+			 	if (tmpData) node.data = tmpData;
 	        }
-
-
-	 
 	    }
-	 
 	};
-
-/*
- * parse the data in a dom text node and replace it with
- * the updated units. 
- */
-
-	function parseNode(textNode) {
-		
-
-		var tmpData = parse(textNode.data);
-	 	if (tmpData) textNode.data = tmpData;
 
 /* This commented section is saved for future because we might want to add links to the text nodes at some point. */ 
 	 
@@ -172,8 +158,6 @@
 	 
 	    // Remove original text-node:
 	    //textNode.parentNode.removeChild(textNode);
-	 
-	};
 
 /*
  * Take a string argument, go through it and return a string where the units have been changed to
@@ -234,8 +218,8 @@
 				/* smallAfterSection is the unit, plus maybe something. originalType is only the unit. 
 				   continueIndex is where the text continues after the unit.
 				 */
-
-				smallAfterSection = todoBody.substring(cindex + 1, cindex+7);
+				// 9 = enough to fit " gallons"
+				smallAfterSection = todoBody.substring(cindex + 1, cindex+9);
 
 				smallAfterSplit = smallAfterSection.split(/\s/);
 				originalType = smallAfterSplit[0];
@@ -317,7 +301,7 @@
 
 				/* Check for possible "1 to 2 cups" pattern. */
 
-				toIndex = smallSection.substring(0, lastNumIndex).search(/([ \t]to|[ \t]or|[ \t]and|-)[ \t]*$/);
+				toIndex = smallSection.substring(0, lastNumIndex).search(/-?[ \t]*([ \t]to|[ \t]or|[ \t]and|-)[ \t]*$/);
 
 				if (toIndex != -1) {
 					firstNumIndex = smallSection.substring(0, toIndex).search(/[0-9][0-9.,/]*-?[ \t]*$/);
